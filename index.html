@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أبطال الترشيد.. كنز المستقبل</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: url('image/backgrond.jfif') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cairo', Tahoma, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: -1;
+        }
+
+        /* تنسيق وحجم وموضع اللوجو في أعلى الشاشة من الجنب */
+        .top-logo {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 90px;
+            height: auto;
+            object-fit: contain;
+            z-index: 20;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+        }
+
+        .book-container {
+            perspective: 3000px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .book {
+            width: 840px;
+            height: 560px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .book.closed {
+            width: 400px;
+            box-shadow: 25px 30px 60px rgba(0,0,0,0.7);
+        }
+
+        .book.opened {
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        .page {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            top: 0;
+            transform-style: preserve-3d;
+            transform-origin: left;
+            transition: transform 1.1s cubic-bezier(0.645, 0.045, 0.355, 1), box-shadow 0.5s ease;
+            backface-visibility: hidden;
+            background: #fdfbf7;
+            display: none;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.08);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .cover-page {
+            right: 0;
+            width: 100% !important;
+            z-index: 25;
+            cursor: pointer;
+            border-radius: 6px 16px 16px 6px;
+            border-left: 14px solid #111;
+            transition: transform 1.1s cubic-bezier(0.645, 0.045, 0.355, 1);
+        }
+
+        .cover-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px 14px 14px 4px;
+        }
+
+        .back-cover-page {
+            left: 0;
+            width: 100% !important;
+            z-index: 25;
+            border-radius: 16px 6px 6px 16px;
+            border-right: 14px solid #111;
+        }
+
+        .back-cover-page img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px 4px 4px 14px;
+        }
+
+        .page-content {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .page-content img, .page-content video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        @keyframes pulseVideoBtn {
+            0% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.6)); }
+            50% { transform: translateX(-50%) scale(1.18); filter: drop-shadow(0 0 22px rgba(241, 196, 15, 1)); }
+            100% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.6)); }
+        }
+
+        .video-icon-btn {
+            position: absolute;
+            top: 22%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            z-index: 15;
+            cursor: pointer;
+            animation: pulseVideoBtn 1.6s infinite ease-in-out;
+        }
+
+        .video-icon-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            box-shadow: none !important;
+        }
+
+        .video-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .video-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .video-modal-card {
+            position: relative;
+            width: 580px;
+            max-width: 90%;
+            background: #2c3e50;
+            border-radius: 20px;
+            padding: 12px;
+            border: 3px solid #e67e22;
+        }
+
+        .video-modal-card video {
+            width: 100%;
+            max-height: 380px;
+            border-radius: 14px;
+            display: block;
+        }
+
+        .close-video-btn {
+            position: absolute;
+            top: -16px;
+            left: -16px;
+            background: #e74c3c;
+            color: white;
+            border: 3px solid white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quiz-container, .match-page-container, .food-page-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            border-radius: 6px;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .quiz-bg, .match-bg, .food-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .quiz-options {
+            position: absolute;
+            top: 46%; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .quiz-option-wrapper {
+            position: relative;
+            width: 190px;
+            height: 150px;
+        }
+
+        .quiz-option-btn {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .quiz-option-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .quiz-option-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .feedback-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 50px;
+            height: 50px;
+            pointer-events: none;
+            z-index: 30;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            object-fit: contain;
+        }
+
+        .feedback-icon.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .match-feedback-icon {
+            position: absolute;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) scale(0);
+            width: 50px !important;
+            height: 50px !important;
+            max-width: 50px !important;
+            max-height: 50px !important;
+            pointer-events: none;
+            z-index: 30;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            object-fit: contain;
+        }
+
+        .match-feedback-icon.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .target-zone {
+            position: absolute;
+            width: 95px;  
+            height: 95px;  
+            right: 2%; 
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.22);
+            border: 2px dashed rgba(52, 152, 219, 0.6);
+            border-radius: 18px;
+        }
+
+        .hple-rope {
+            position: absolute;
+            height: 70px;
+            width: 90px;
+            background-image: url('image/hple.png');
+            background-repeat: repeat-x;
+            background-size: contain;
+            cursor: grab;
+            transform-origin: left center;
+            touch-action: none;
+            z-index: 10;
+        }
+
+        .food-top-circle {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            top: 36.5%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .food-top-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .food-top-circle img.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .food-bottom-btn {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .food-error-popup {
+            position: absolute;
+            top: 50% !important;
+            left: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            max-width: 50px !important;
+            max-height: 50px !important;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 30;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            object-fit: contain;
+        }
+
+        .food-error-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .navigation {
+            margin-top: 25px;
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .nav-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: #d35400;
+            transform: scale(1.05);
+        }
+
+        .nav-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- إضافة اللوجو في أعلى الشاشة من الجنب -->
+    <img src="image/logoo.png" alt="الشعار" class="top-logo">
+
+    <!-- ملفات الصوت من مجلد sound -->
+    <audio id="bgMusic" src="sound/back.mp3" loop></audio>
+    <audio id="turnSound" src="sound/turn.mp3"></audio>
+    <audio id="sound1" src="sound/sound1.mp3"></audio>
+    <audio id="q6Sound" src="sound/q6.mp3"></audio>
+    <audio id="q8Sound" src="sound/q8.mp3"></audio>
+    <audio id="q11Sound" src="sound/q11.mp3"></audio>
+    <audio id="correctAnswer" src="sound/correct answer.wav"></audio>
+    <audio id="gameCorrect" src="sound/game correct.wav"></audio>
+    <audio id="wrongAnswer" src="sound/wrong answer.wav"></audio>
+    <audio id="gameWrong" src="sound/game wrong.wav"></audio>
+
+    <div class="book-container">
+        <div class="book closed" id="book">
+            
+            <div class="page" id="p1" style="right: 0;">
+                <div class="page-content"><img src="image/pag1.png" alt="الصفحة 1"></div>
+            </div>
+
+            <div class="page" id="p2" style="left: 0; transform-origin: right;">
+                <div class="page-content">
+                    <img src="image/pag2.png" alt="الصفحة 2">
+                    <div class="video-icon-btn" onclick="openCustomVideo()">
+                        <img src="image/vedo.png" alt="فيديو">
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="p3" style="right: 0;">
+                <div class="page-content"><img src="image/pag3.png" alt="الصفحة 3"></div>
+            </div>
+
+            <div class="page" id="p4" style="left: 0; transform-origin: right;">
+                <div class="page-content"><video src="image/pag4.mp4" controls autoplay muted loop></video></div>
+            </div>
+
+            <div class="page" id="p5" style="right: 0;">
+                <div class="page-content"><img src="image/pag5.png" alt="الصفحة 5"></div>
+            </div>
+
+            <!-- الصفحة 6: نشاط الاختيار -->
+            <div class="page" id="p6" style="left: 0; transform-origin: right;">
+                <div class="page-content">
+                    <div class="quiz-container">
+                        <img src="image/pag6.png" alt="الصفحة 6" class="quiz-bg">
+                        <div class="quiz-options">
+                            <div class="quiz-option-wrapper">
+                                <button class="quiz-option-btn" onclick="checkQuiz(false)"><img src="image/quiz1.png" alt="خطأ"></button>
+                                <img src="image/no.png" id="noIcon" class="feedback-icon" alt="خطأ">
+                            </div>
+                            <div class="quiz-option-wrapper">
+                                <button class="quiz-option-btn" onclick="checkQuiz(true)"><img src="image/quiz2.png" alt="صح"></button>
+                                <img src="image/yes.png" id="yesIcon" class="feedback-icon" alt="صح">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="p7" style="right: 0;">
+                <div class="page-content"><img src="image/pag7.png" alt="الصفحة 7"></div>
+            </div>
+
+            <!-- الصفحة 8: نشاط التوصيل -->
+            <div class="page" id="p8" style="left: 0; transform-origin: right;">
+                <div class="page-content">
+                    <div class="match-page-container" id="matchContainer">
+                        <img src="image/pag8.png" alt="الصفحة 8" class="match-bg">
+                        <div class="target-zone" id="target1" style="top: 17.5%;"></div> 
+                        <div class="target-zone" id="target2" style="top: 45.5%;"></div> 
+                        <div class="target-zone" id="target3" style="top: 73.5%;"></div> 
+                        <div class="hple-rope" id="rope1" style="top: 21.5%; left: 24.5%;"></div> 
+                        <div class="hple-rope" id="rope2" style="top: 48.5%; left: 24.5%;"></div> 
+                        <div class="hple-rope" id="rope3" style="top: 75.5%; left: 24.5%;"></div> 
+                        <img src="image/yes.png" id="matchYesIcon" class="match-feedback-icon" alt="صح">
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="p9" style="right: 0;">
+                <div class="page-content"><img src="image/pag9.png" alt="الصفحة 9"></div>
+            </div>
+
+            <!-- الصفحة 10: نشاط الأطعمة -->
+            <div class="page" id="p10" style="left: 0; transform-origin: right;">
+                <div class="page-content">
+                    <div class="food-page-container" id="foodGameContainer">
+                        <img src="image/pag10.png" alt="الصفحة 10" class="food-bg">
+                        
+                        <div class="food-top-circle" style="left: 17.2%;"><img src="image/yes.png" id="topCheck1" alt="صح"></div>
+                        <div class="food-top-circle" style="left: 33.3%;"><img src="image/yes.png" id="topCheck2" alt="صح"></div>
+                        <div class="food-top-circle" style="left: 49.5%;"><img src="image/yes.png" id="topCheck3" alt="صح"></div>
+                        <div class="food-top-circle" style="left: 65.6%;"><img src="image/yes.png" id="topCheck4" alt="صح"></div>
+                        <div class="food-top-circle" style="left: 81.8%;"><img src="image/yes.png" id="topCheck5" alt="صح"></div>
+
+                        <div class="food-bottom-btn" style="top: 47.5%; left: 18.0%;" onclick="clickCorrectFood(1)"></div>
+                        <div class="food-bottom-btn" style="top: 47.5%; left: 34.5%;" onclick="clickCorrectFood(2)"></div>
+                        <div class="food-bottom-btn" style="top: 47.5%; left: 51.0%;" onclick="clickCorrectFood(3)"></div>
+                        <div class="food-bottom-btn" style="top: 47.5%; left: 67.5%;" onclick="clickCorrectFood(4)"></div>
+                        <div class="food-bottom-btn" style="top: 47.5%; left: 84.0%;" onclick="clickCorrectFood(5)"></div>
+
+                        <div class="food-bottom-btn" style="top: 64.0%; left: 18.0%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 64.0%; left: 34.5%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 64.0%; left: 51.0%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 64.0%; left: 67.5%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 64.0%; left: 84.0%;" onclick="clickWrongFood()"></div>
+
+                        <div class="food-bottom-btn" style="top: 80.5%; left: 18.0%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 80.5%; left: 34.5%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 80.5%; left: 51.0%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 80.5%; left: 67.5%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 80.5%; left: 84.0%;" onclick="clickWrongFood()"></div>
+
+                        <div class="food-bottom-btn" style="top: 94.0%; left: 27.0%;" onclick="clickWrongFood()"></div>
+                        <div class="food-bottom-btn" style="top: 94.0%; left: 51.0%;" onclick="clickWrongFood()"></div>
+
+                        <img src="image/no.png" id="tempErrorPopup" class="food-error-popup" alt="خطأ">
+                    </div>
+                </div>
+            </div>
+
+            <!-- الصفحة 11 -->
+            <div class="page" id="p11" style="right: 0;">
+                <div class="page-content"><img src="image/pag11.png" alt="الصفحة 11"></div>
+            </div>
+
+            <!-- الصفحة 12 -->
+            <div class="page" id="p12" style="left: 0; transform-origin: right;">
+                <div class="page-content"><img src="image/pag12.png" alt="الصفحة 12"></div>
+            </div>
+
+            <!-- غلاف البداية الأمامي -->
+            <div class="page cover-page active" id="cover" onclick="nextPage()">
+                <img src="image/covr.png" alt="الغلاف">
+            </div>
+
+            <!-- غلاف النهاية الخلفي -->
+            <div class="page back-cover-page" id="backCover">
+                <img src="image/final.png" alt="نهاية الكتاب">
+            </div>
+
+        </div>
+    </div>
+
+    <div class="video-modal-overlay" id="videoModal" onclick="closeCustomVideo(event)">
+        <div class="video-modal-card" onclick="event.stopPropagation()">
+            <button class="close-video-btn" onclick="closeCustomVideo()">✕</button>
+            <video id="popupVideo" src="image/video.mp4" controls></video>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" onclick="prevPage()" disabled>⬅ السابق</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextPage()">افتح الكتاب 📖</button>
+    </div>
+
+    <script>
+        let currentState = 0;
+        const totalStates = 7;
+        let quizTimeout = null;
+        let matchTimeout = null;
+        let errorTimeout = null;
+        let musicStarted = false;
+
+        function playBgMusic() {
+            const music = document.getElementById('bgMusic');
+            if (!musicStarted && music) {
+                music.volume = 0.25;
+                music.play().then(() => {
+                    musicStarted = true;
+                }).catch(err => {
+                    console.log("Autoplay prevented:", err);
+                });
+            }
+        }
+
+        function playTurnSound() {
+            const turnSound = document.getElementById('turnSound');
+            if (turnSound) {
+                turnSound.currentTime = 0;
+                turnSound.volume = 0.95;
+                turnSound.play().catch(err => {
+                    console.log("Turn sound error:", err);
+                });
+            }
+        }
+
+        function handleSound1() {
+            const sound1 = document.getElementById('sound1');
+            if (sound1) {
+                if (currentState === 1) {
+                    sound1.currentTime = 0;
+                    sound1.volume = 0.9;
+                    sound1.play().catch(err => {
+                        console.log("Sound1 error:", err);
+                    });
+                } else {
+                    sound1.pause();
+                    sound1.currentTime = 0;
+                }
+            }
+        }
+
+        function handleQ6Sound() {
+            const q6Sound = document.getElementById('q6Sound');
+            if (q6Sound) {
+                if (currentState === 3) {
+                    q6Sound.currentTime = 0;
+                    q6Sound.volume = 0.9;
+                    q6Sound.play().catch(err => {
+                        console.log("Q6 sound error:", err);
+                    });
+                } else {
+                    q6Sound.pause();
+                    q6Sound.currentTime = 0;
+                }
+            }
+        }
+
+        function handleQ8Sound() {
+            const q8Sound = document.getElementById('q8Sound');
+            if (q8Sound) {
+                if (currentState === 4) {
+                    q8Sound.currentTime = 0;
+                    q8Sound.volume = 0.9;
+                    q8Sound.play().catch(err => {
+                        console.log("Q8 sound error:", err);
+                    });
+                } else {
+                    q8Sound.pause();
+                    q8Sound.currentTime = 0;
+                }
+            }
+        }
+
+        function handleQ11Sound() {
+            const q11Sound = document.getElementById('q11Sound');
+            if (q11Sound) {
+                if (currentState === 5) {
+                    q11Sound.currentTime = 0;
+                    q11Sound.volume = 0.9;
+                    q11Sound.play().catch(err => {
+                        console.log("Q11 sound error:", err);
+                    });
+                } else {
+                    q11Sound.pause();
+                    q11Sound.currentTime = 0;
+                }
+            }
+        }
+
+        function openCustomVideo() {
+            playBgMusic();
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('popupVideo');
+            modal.classList.add('active');
+            video.currentTime = 0;
+            video.play();
+            video.onended = function() { closeCustomVideo(); };
+        }
+
+        function closeCustomVideo() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('popupVideo');
+            modal.classList.remove('active');
+            video.pause();
+        }
+
+        function resetAllRopes() {
+            const ropes = document.querySelectorAll('.hple-rope');
+            ropes.forEach(r => resetRope(r));
+            const matchYes = document.getElementById('matchYesIcon');
+            if (matchYes) matchYes.classList.remove('show');
+            resetFoodGame();
+        }
+
+        function updateBook() {
+            playBgMusic();
+            handleSound1();
+            handleQ6Sound();
+            handleQ8Sound();
+            handleQ11Sound();
+
+            const book = document.getElementById('book');
+            const cover = document.getElementById('cover');
+            const p1 = document.getElementById('p1');
+            const p2 = document.getElementById('p2');
+            const p3 = document.getElementById('p3');
+            const p4 = document.getElementById('p4');
+            const p5 = document.getElementById('p5');
+            const p6 = document.getElementById('p6');
+            const p7 = document.getElementById('p7');
+            const p8 = document.getElementById('p8');
+            const p9 = document.getElementById('p9');
+            const p10 = document.getElementById('p10');
+            const p11 = document.getElementById('p11');
+            const p12 = document.getElementById('p12');
+            const backCover = document.getElementById('backCover');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            resetAllRopes();
+            closeCustomVideo();
+
+            [cover, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, backCover].forEach(p => p.classList.remove('active', 'flipped'));
+
+            if (currentState === 0) {
+                book.classList.add('closed');
+                book.classList.remove('opened');
+                cover.classList.add('active');
+                prevBtn.disabled = true;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'افتح الكتاب 📖';
+            } else if (currentState === 1) {
+                book.classList.remove('closed');
+                book.classList.add('opened');
+                cover.classList.add('active', 'flipped');
+                p1.classList.add('active');
+                p2.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'التالي ➔';
+            } else if (currentState === 2) {
+                book.classList.remove('closed');
+                book.classList.add('opened');
+                cover.classList.add('active', 'flipped');
+                p1.classList.add('active', 'flipped');
+                p2.classList.add('active', 'flipped');
+                p3.classList.add('active');
+                p4.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'التالي ➔';
+            } else if (currentState === 3) {
+                book.classList.remove('closed');
+                book.classList.add('opened');
+                cover.classList.add('active', 'flipped');
+                p1.classList.add('active', 'flipped');
+                p2.classList.add('active', 'flipped');
+                p3.classList.add('active', 'flipped');
+                p4.classList.add('active', 'flipped');
+                p5.classList.add('active');
+                p6.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'التالي ➔';
+            } else if (currentState === 4) {
+                book.classList.remove('closed');
+                book.classList.add('opened');
+                cover.classList.add('active', 'flipped');
+                p1.classList.add('active', 'flipped');
+                p2.classList.add('active', 'flipped');
+                p3.classList.add('active', 'flipped');
+                p4.classList.add('active', 'flipped');
+                p5.classList.add('active', 'flipped');
+                p6.classList.add('active', 'flipped');
+                p7.classList.add('active');
+                p8.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'التالي ➔';
+            } else if (currentState === 5) {
+                book.classList.remove('closed');
+                book.classList.add('opened');
+                cover.classList.add('active', 'flipped');
+                p1.classList.add('active', 'flipped');
+                p2.classList.add('active', 'flipped');
+                p3.classList.add('active', 'flipped');
+                p4.classList.add('active', 'flipped');
+                p5.classList.add('active', 'flipped');
+                p6.classList.add('active', 'flipped');
+                p7.classList.add('active', 'flipped');
+                p8.classList.add('active', 'flipped');
+                p9.classList.add('active');
+                p10.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'التالي ➔';
+            } else if (currentState === 6) {
+                book.classList.remove('closed');
+                book.classList.add('opened');
+                cover.classList.add('active', 'flipped');
+                p1.classList.add('active', 'flipped');
+                p2.classList.add('active', 'flipped');
+                p3.classList.add('active', 'flipped');
+                p4.classList.add('active', 'flipped');
+                p5.classList.add('active', 'flipped');
+                p6.classList.add('active', 'flipped');
+                p7.classList.add('active', 'flipped');
+                p8.classList.add('active', 'flipped');
+                p9.classList.add('active', 'flipped');
+                p10.classList.add('active', 'flipped');
+                p11.classList.add('active');
+                p12.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                nextBtn.innerText = 'التالي ➔';
+            } else if (currentState === 7) {
+                book.classList.add('closed');
+                book.classList.remove('opened');
+                backCover.classList.add('active');
+                prevBtn.disabled = false;
+                nextBtn.disabled = true;
+                nextBtn.innerText = 'نهاية الكتاب ✨';
+            }
+        }
+
+        function nextPage() {
+            if (currentState < totalStates) {
+                currentState++;
+                playTurnSound();
+                updateBook();
+            }
+        }
+
+        function prevPage() {
+            if (currentState > 0) {
+                currentState--;
+                playTurnSound();
+                updateBook();
+            }
+        }
+
+        function checkQuiz(isCorrect) {
+            playBgMusic();
+            const yesIcon = document.getElementById('yesIcon');
+            const noIcon = document.getElementById('noIcon');
+            const correctAnswer = document.getElementById('correctAnswer');
+            const gameCorrect = document.getElementById('gameCorrect');
+            const wrongAnswer = document.getElementById('wrongAnswer');
+            const gameWrong = document.getElementById('gameWrong');
+
+            if (quizTimeout) clearTimeout(quizTimeout);
+            yesIcon.classList.remove('show');
+            noIcon.classList.remove('show');
+
+            if (isCorrect) {
+                yesIcon.classList.add('show');
+                if (correctAnswer) { correctAnswer.currentTime = 0; correctAnswer.play().catch(e=>{}); }
+                if (gameCorrect) { gameCorrect.currentTime = 0; gameCorrect.play().catch(e=>{}); }
+            } else {
+                noIcon.classList.add('show');
+                if (wrongAnswer) { wrongAnswer.currentTime = 0; wrongAnswer.play().catch(e=>{}); }
+                if (gameWrong) { gameWrong.currentTime = 0; gameWrong.play().catch(e=>{}); }
+            }
+
+            quizTimeout = setTimeout(() => {
+                yesIcon.classList.remove('show');
+                noIcon.classList.remove('show');
+            }, 2000);
+        }
+
+        function clickCorrectFood(index) {
+            playBgMusic();
+            const targetCheck = document.getElementById('topCheck' + index);
+            const correctAnswer = document.getElementById('correctAnswer');
+            const gameCorrect = document.getElementById('gameCorrect');
+
+            if (targetCheck) {
+                targetCheck.classList.add('show');
+                if (correctAnswer) { correctAnswer.currentTime = 0; correctAnswer.play().catch(e=>{}); }
+                if (gameCorrect) { gameCorrect.currentTime = 0; gameCorrect.play().catch(e=>{}); }
+            }
+        }
+
+        function clickWrongFood() {
+            playBgMusic();
+            const errorPopup = document.getElementById('tempErrorPopup');
+            const wrongAnswer = document.getElementById('wrongAnswer');
+            const gameWrong = document.getElementById('gameWrong');
+
+            if (errorTimeout) clearTimeout(errorTimeout);
+            errorPopup.classList.add('show');
+            if (wrongAnswer) { wrongAnswer.currentTime = 0; wrongAnswer.play().catch(e=>{}); }
+            if (gameWrong) { gameWrong.currentTime = 0; gameWrong.play().catch(e=>{}); }
+
+            errorTimeout = setTimeout(() => {
+                errorPopup.classList.remove('show');
+            }, 1000);
+        }
+
+        function resetFoodGame() {
+            for (let i = 1; i <= 5; i++) {
+                const checkImg = document.getElementById('topCheck' + i);
+                if (checkImg) checkImg.classList.remove('show');
+            }
+            const errorPopup = document.getElementById('tempErrorPopup');
+            if (errorPopup) errorPopup.classList.remove('show');
+        }
+
+        const ropes = document.querySelectorAll('.hple-rope');
+        const targets = document.querySelectorAll('.target-zone');
+        const correctConnections = { 'rope1': 'target1', 'rope2': 'target2', 'rope3': 'target3' };
+
+        ropes.forEach(rope => {
+            let isDragging = false;
+            let originX, originY;
+
+            rope.addEventListener('pointerdown', (e) => {
+                playBgMusic();
+                isDragging = true;
+                rope.setPointerCapture(e.pointerId);
+                const rect = rope.getBoundingClientRect();
+                const containerRect = rope.parentElement.getBoundingClientRect();
+                originX = rect.left - containerRect.left;
+                originY = (rect.top - containerRect.top) + (rect.height / 2);
+            });
+
+            rope.addEventListener('pointermove', (e) => {
+                if (!isDragging) return;
+                const containerRect = rope.parentElement.getBoundingClientRect();
+                const currentMouseX = e.clientX - containerRect.left;
+                const currentMouseY = e.clientY - containerRect.top;
+                const deltaX = currentMouseX - originX;
+                const deltaY = currentMouseY - originY;
+                const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+                rope.style.width = Math.max(90, length) + 'px';
+                rope.style.transform = `rotate(${angle}deg)`;
+            });
+
+            rope.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                rope.releasePointerCapture(e.pointerId);
+
+                const rect = rope.getBoundingClientRect();
+                const currentLength = parseFloat(rope.style.width);
+                const currentAngleRad = parseFloat(rope.style.transform.replace('rotate(', '').replace('deg)', '')) * (Math.PI / 180);
+                const ropeEndX = rect.left + currentLength * Math.cos(currentAngleRad);
+                const ropeEndY = rect.top + (rect.height / 2) + currentLength * Math.sin(currentAngleRad);
+
+                let hitTarget = null;
+                targets.forEach(target => {
+                    const targetRect = target.getBoundingClientRect();
+                    if (ropeEndX >= targetRect.left && ropeEndX <= targetRect.right &&
+                        ropeEndY >= targetRect.top && ropeEndY <= targetRect.bottom) {
+                        hitTarget = target.id;
+                    }
+                });
+
+                const matchYes = document.getElementById('matchYesIcon');
+                const correctAnswer = document.getElementById('correctAnswer');
+                const gameCorrect = document.getElementById('gameCorrect');
+                const wrongAnswer = document.getElementById('wrongAnswer');
+                const gameWrong = document.getElementById('gameWrong');
+
+                if (matchTimeout) clearTimeout(matchTimeout);
+                matchYes.classList.remove('show');
+
+                if (hitTarget && correctConnections[rope.id] === hitTarget) {
+                    matchYes.classList.add('show');
+                    if (correctAnswer) { correctAnswer.currentTime = 0; correctAnswer.play().catch(e=>{}); }
+                    if (gameCorrect) { gameCorrect.currentTime = 0; gameCorrect.play().catch(e=>{}); }
+                    matchTimeout = setTimeout(() => { matchYes.classList.remove('show'); }, 2000);
+                } else {
+                    if (wrongAnswer) { wrongAnswer.currentTime = 0; wrongAnswer.play().catch(e=>{}); }
+                    if (gameWrong) { gameWrong.currentTime = 0; gameWrong.play().catch(e=>{}); }
+                    resetRope(rope);
+                }
+            });
+        });
+
+        function resetRope(ropeElem) {
+            ropeElem.style.width = '90px';
+            ropeElem.style.transform = 'rotate(0deg)';
+        }
+    </script>
+</body>
+</html>
